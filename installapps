@@ -1,0 +1,57 @@
+#!/bin/bash
+# mac_setup.sh — Install Chrome, Google Drive, and Microsoft Office
+# Run with: bash mac_setup.sh
+
+set -e  # Exit immediately if any command fails
+
+echo "=== Mac Setup Script ==="
+echo ""
+
+# ── 1. Install Homebrew if not present ──────────────────────────────────────
+if ! command -v brew &>/dev/null; then
+  echo "📦 Installing Homebrew..."
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+  # Add Homebrew to PATH for Apple Silicon Macs
+  if [[ $(uname -m) == "arm64" ]]; then
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  fi
+else
+  echo "✅ Homebrew already installed — skipping."
+fi
+
+echo ""
+
+# ── 2. Update Homebrew ───────────────────────────────────────────────────────
+echo "🔄 Updating Homebrew..."
+brew update
+
+echo ""
+
+# ── 3. Install apps ─────────────────────────────────────────────────────────
+install_cask() {
+  local cask="$1"
+  local name="$2"
+
+  if brew list --cask "$cask" &>/dev/null; then
+    echo "✅ $name already installed — skipping."
+  else
+    echo "⬇️  Installing $name..."
+    brew install --cask "$cask"
+    echo "✅ $name installed."
+  fi
+  echo ""
+}
+
+install_cask "google-chrome"       "Google Chrome"
+install_cask "google-drive"        "Google Drive"
+install_cask "microsoft-office"    "Microsoft Office"
+
+# ── 4. Done ─────────────────────────────────────────────────────────────────
+echo "🎉 All done!"
+echo ""
+echo "Next steps:"
+echo "  • Open Google Drive and sign in with your Google account."
+echo "  • Open any Office app (Word, Excel, etc.) and sign in with"
+echo "    your Microsoft 365 account to activate."
